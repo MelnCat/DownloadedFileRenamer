@@ -4,13 +4,15 @@ import { uuidv7 } from "npm:uuidv7";
 
 const watcher = Deno.watchFs(`${homedir()}/Downloads/`, { recursive: false });
 
+console.log("Watching for downloads...");
+
 for await (const event of watcher) {
 	if (event.kind !== "create") continue;
-	const [file] = event.paths;
-	const info = Deno.lstatSync(file);
+	const [filePath] = event.paths;
+	const info = Deno.lstatSync(filePath);
 	if (!info.isFile) continue;
-	const opened = await Deno.open
-	Deno.flockSync(file);
-	Deno.renameSync(file, `${path.dirname(file)}/${uuidv7()}${path.extname(file)}`);
-	Deno.funlockSync(file);
+	setTimeout(() => {
+		Deno.renameSync(filePath, `${path.dirname(filePath)}/${uuidv7()}${path.extname(filePath)}`);
+		console.log(`Renamed ${path.basename(filePath)}!`)
+	}, 100);
 }
